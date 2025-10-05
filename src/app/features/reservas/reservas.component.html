@@ -1,0 +1,169 @@
+<div class="page-container">
+  <app-sidebar></app-sidebar>
+  
+  <div class="main-content">
+    <app-header></app-header>
+    
+    <div class="content">
+      <div class="page-header">
+        <h1>Reservas</h1>
+        <button class="btn-primary" (click)="abrirModal()">
+          + Nova Reserva
+        </button>
+      </div>
+
+      <div class="filters">
+        <button 
+          class="filter-btn" 
+          [class.active]="filtroStatus === 'TODAS'"
+          (click)="filtrar('TODAS')">
+          Todas
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="filtroStatus === StatusReserva.ATIVA"
+          (click)="filtrar(StatusReserva.ATIVA)">
+          Ativas
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="filtroStatus === StatusReserva.FINALIZADA"
+          (click)="filtrar(StatusReserva.FINALIZADA)">
+          Finalizadas
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.active]="filtroStatus === StatusReserva.CANCELADA"
+          (click)="filtrar(StatusReserva.CANCELADA)">
+          Canceladas
+        </button>
+      </div>
+
+      <app-loading *ngIf="loading"></app-loading>
+
+      <div class="table-container" *ngIf="!loading">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Cliente</th>
+              <th>Apartamento</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Hóspedes</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let reserva of reservas">
+              <td>{{ reserva.id }}</td>
+              <td>{{ reserva.cliente.nome }}</td>
+              <td>{{ reserva.apartamento.numeroApartamento }}</td>
+              <td>{{ formatarData(reserva.dataCheckin) }}</td>
+              <td>{{ formatarData(reserva.dataCheckout) }}</td>
+              <td>{{ reserva.quantidadeHospede }}</td>
+              <td>{{ formatarValor(reserva.totalHospedagem) }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(reserva.status)">
+                  {{ reserva.status }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button 
+                  class="btn-action btn-edit"
+                  *ngIf="reserva.status === StatusReserva.ATIVA"
+                  (click)="alterarHospedes(reserva)">
+                  Alterar Hóspedes
+                </button>
+                <button 
+                  class="btn-action btn-success"
+                  *ngIf="reserva.status === StatusReserva.ATIVA"
+                  (click)="finalizarReserva(reserva.id!)">
+                  Finalizar
+                </button>
+                <button 
+                  class="btn-action btn-danger"
+                  *ngIf="reserva.status === StatusReserva.ATIVA"
+                  (click)="cancelarReserva(reserva.id!)">
+                  Cancelar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="no-data" *ngIf="reservas.length === 0">
+          Nenhuma reserva encontrada
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-modal 
+    [isOpen]="showModal" 
+    [title]="'Nova Reserva'"
+    (closed)="fecharModal()">
+    <form [formGroup]="reservaForm" (ngSubmit)="salvar()">
+      <div class="form-group">
+        <label>Cliente *</label>
+        <select formControlName="clienteId" class="form-control">
+          <option value="">Selecione o cliente</option>
+          <option *ngFor="let cliente of clientes" [value]="cliente.id">
+            {{ cliente.nome }} - {{ cliente.cpf }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Check-in *</label>
+          <input 
+            type="datetime-local" 
+            formControlName="dataCheckin"
+            (change)="onDateChange()"
+            class="form-control" />
+        </div>
+
+        <div class="form-group">
+          <label>Check-out *</label>
+          <input 
+            type="datetime-local" 
+            formControlName="dataCheckout"
+            (change)="onDateChange()"
+            class="form-control" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Apartamento *</label>
+        <select formControlName="apartamentoId" class="form-control">
+          <option value="">Selecione o apartamento</option>
+          <option *ngFor="let apt of apartamentosDisponiveis" [value]="apt.id">
+            {{ apt.numeroApartamento }} - {{ apt.tipoApartamento.tipo }} 
+            (Cap: {{ apt.capacidade }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Quantidade de Hóspedes *</label>
+        <input 
+          type="number" 
+          formControlName="quantidadeHospede"
+          min="1"
+          class="form-control" />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="fecharModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          Salvar
+        </button>
+      </div>
+    </form>
+  </app-modal>
+</div>

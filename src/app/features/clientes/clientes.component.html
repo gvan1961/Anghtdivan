@@ -1,0 +1,199 @@
+<div class="page-container">
+  <app-sidebar></app-sidebar>
+  
+  <div class="main-content">
+    <app-header></app-header>
+    
+    <div class="content">
+      <div class="page-header">
+        <h1>Clientes</h1>
+        <button class="btn-primary" (click)="abrirModal()">
+          + Novo Cliente
+        </button>
+      </div>
+
+      <div class="search-bar">
+        <input 
+          type="text" 
+          placeholder="Buscar por nome ou CPF..."
+          (input)="buscar($event)"
+          class="search-input" />
+      </div>
+
+      <app-loading *ngIf="loading"></app-loading>
+
+      <div class="table-container" *ngIf="!loading">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Celular</th>
+              <th>Cidade/UF</th>
+              <th>Data Nascimento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cliente of clientesFiltrados">
+              <td>{{ cliente.nome }}</td>
+              <td>{{ formatarCPF(cliente.cpf) }}</td>
+              <td>{{ cliente.celular }}</td>
+              <td>{{ cliente.cidade }}/{{ cliente.estado }}</td>
+              <td>{{ formatarData(cliente.dataNascimento) }}</td>
+              <td class="actions-cell">
+                <button class="btn-action btn-edit" (click)="editar(cliente)">
+                  Editar
+                </button>
+                <button class="btn-action btn-danger" (click)="deletar(cliente.id!)">
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="no-data" *ngIf="clientesFiltrados.length === 0">
+          Nenhum cliente encontrado
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-modal 
+    [isOpen]="showModal" 
+    [title]="clienteEditando ? 'Editar Cliente' : 'Novo Cliente'"
+    (closed)="fecharModal()">
+    <form [formGroup]="clienteForm" (ngSubmit)="salvar()">
+      <div class="form-group">
+        <label>Nome Completo *</label>
+        <input 
+          type="text" 
+          formControlName="nome" 
+          class="form-control"
+          [class.error]="clienteForm.get('nome')?.invalid && clienteForm.get('nome')?.touched"
+          placeholder="Digite o nome completo" />
+        <div class="error-message" *ngIf="clienteForm.get('nome')?.invalid && clienteForm.get('nome')?.touched">
+          Nome é obrigatório
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>CPF *</label>
+          <input 
+            type="text" 
+            formControlName="cpf" 
+            class="form-control"
+            [class.error]="clienteForm.get('cpf')?.invalid && clienteForm.get('cpf')?.touched"
+            (input)="aplicarMascaraCPF($event)"
+            placeholder="000.000.000-00" />
+          <div class="error-message" *ngIf="clienteForm.get('cpf')?.invalid && clienteForm.get('cpf')?.touched">
+            CPF é obrigatório
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Celular *</label>
+          <input 
+            type="text" 
+            formControlName="celular" 
+            class="form-control"
+            [class.error]="clienteForm.get('celular')?.invalid && clienteForm.get('celular')?.touched"
+            (input)="aplicarMascaraCelular($event)"
+            placeholder="(00) 00000-0000" />
+          <div class="error-message" *ngIf="clienteForm.get('celular')?.invalid && clienteForm.get('celular')?.touched">
+            Celular é obrigatório
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Endereço</label>
+        <input 
+          type="text" 
+          formControlName="endereco" 
+          class="form-control"
+          placeholder="Rua, número, bairro" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>CEP</label>
+          <input 
+            type="text" 
+            formControlName="cep" 
+            class="form-control"
+            (input)="aplicarMascaraCEP($event)"
+            placeholder="00000-000" />
+        </div>
+
+        <div class="form-group">
+          <label>Data Nascimento *</label>
+          <input 
+            type="date" 
+            formControlName="dataNascimento" 
+            class="form-control"
+            [class.error]="clienteForm.get('dataNascimento')?.invalid && clienteForm.get('dataNascimento')?.touched" />
+          <div class="error-message" *ngIf="clienteForm.get('dataNascimento')?.invalid && clienteForm.get('dataNascimento')?.touched">
+            Data de nascimento é obrigatória
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cidade</label>
+          <input 
+            type="text" 
+            formControlName="cidade" 
+            class="form-control"
+            placeholder="Nome da cidade" />
+        </div>
+
+        <div class="form-group">
+          <label>Estado</label>
+          <select formControlName="estado" class="form-control">
+            <option value="">Selecione</option>
+            <option value="AC">Acre</option>
+            <option value="AL">Alagoas</option>
+            <option value="AP">Amapá</option>
+            <option value="AM">Amazonas</option>
+            <option value="BA">Bahia</option>
+            <option value="CE">Ceará</option>
+            <option value="DF">Distrito Federal</option>
+            <option value="ES">Espírito Santo</option>
+            <option value="GO">Goiás</option>
+            <option value="MA">Maranhão</option>
+            <option value="MT">Mato Grosso</option>
+            <option value="MS">Mato Grosso do Sul</option>
+            <option value="MG">Minas Gerais</option>
+            <option value="PA">Pará</option>
+            <option value="PB">Paraíba</option>
+            <option value="PR">Paraná</option>
+            <option value="PE">Pernambuco</option>
+            <option value="PI">Piauí</option>
+            <option value="RJ">Rio de Janeiro</option>
+            <option value="RN">Rio Grande do Norte</option>
+            <option value="RS">Rio Grande do Sul</option>
+            <option value="RO">Rondônia</option>
+            <option value="RR">Roraima</option>
+            <option value="SC">Santa Catarina</option>
+            <option value="SP">São Paulo</option>
+            <option value="SE">Sergipe</option>
+            <option value="TO">Tocantins</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="fecharModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          {{ loading ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </app-modal>
+</div>
