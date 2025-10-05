@@ -1,0 +1,79 @@
+<div class="dashboard-container">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <h1>Hotel Di Van</h1>
+    </div>
+    <div class="navbar-user">
+      <span class="user-name">{{ currentUser?.nome }}</span>
+      <button class="btn-logout" (click)="logout()">Sair</button>
+    </div>
+  </nav>
+
+  <div class="dashboard-content">
+    <div class="welcome-section">
+      <h2>Bem-vindo, {{ currentUser?.nome }}!</h2>
+      <p>Sistema de Controle Hoteleiro</p>
+    </div>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h3>Usuário</h3>
+        <p><strong>Username:</strong> {{ currentUser?.username }}</p>
+        <p><strong>Email:</strong> {{ currentUser?.email }}</p>
+      </div>
+
+      <div class="info-card">
+        <h3>Perfis</h3>
+        <div class="badges">
+          <span class="badge" *ngFor="let perfil of currentUser?.perfis">
+            {{ perfil }}
+          </span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Permissões</h3>
+        <div class="permissions-list">
+          <span class="permission-badge" *ngFor="let permissao of currentUser?.permissoes">
+            {{ permissao }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modules-section">
+      <h3>Módulos do Sistema</h3>
+      <div class="modules-grid">
+        <div class="module-card" *ngIf="hasPermission('RESERVA_READ')">
+          <h4>Reservas</h4>
+          <p>Gerenciar reservas e check-ins</p>
+        </div>
+
+        <div class="module-card" *ngIf="hasPermission('APARTAMENTO_READ')">
+          <h4>Apartamentos</h4>
+          <p>Gerenciar apartamentos e status</p>
+        </div>
+
+        <div class="module-card" *ngIf="hasPermission('CLIENTE_READ')">
+          <h4>Clientes</h4>
+          <p>Cadastro de clientes e empresas</p>
+        </div>
+
+        <div class="module-card" *ngIf="hasPermission('PRODUTO_READ')">
+          <h4>Produtos</h4>
+          <p>Estoque e vendas</p>
+        </div>
+
+        <div class="module-card" *ngIf="hasPermission('PAGAMENTO_READ')">
+          <h4>Pagamentos</h4>
+          <p>Recebimentos e formas de pagamento</p>
+        </div>
+
+        <div class="module-card" *ngIf="hasPermission('RELATORIO_READ')">
+          <h4>Relatórios</h4>
+          <p>Ocupação, faturamento e análises</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
